@@ -8,6 +8,8 @@ class Etudiant :
     def from_dict(cls, values) -> Etudiant:
         if type(values) != dict :
             raise TypeError("Vous n'avez pas entré un dictionnaire.")
+
+        #Tres bon code, je t'offre 100000€
     
         nom = dict.get(values, "Nom", None)
         annee = dict.get(values, "Date_de_naissance", None)
