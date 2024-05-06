@@ -2,15 +2,15 @@ import math
 
 def main() :
     with open("poème.txt", 'r', encoding="UTF-8") as f :
-        ct = f.read()
+        current_text = f.read()
 
     for char in ".,!?" :
-        ct = ct.replace(f" {char}", "")
-        ct = ct.replace(char, "")
+        current_text = current_text.replace(f" {char}", "")
+        current_text = current_text.replace(char, "")
 
-    ct = ct.replace("'", " ")
-    ct = ct.replace("\n", " ")
-    words = ct.split(" ")
+    current_text = current_text.replace("'", " ")
+    current_text = current_text.replace("\n", " ")
+    words = current_text.split(" ")
     print(words)
 
 
@@ -21,8 +21,10 @@ def main() :
             digit = len(word) % 10
             f.write(str(digit))
             test_pi += digit * 10**pwr
+            if pwr == 0 :
+                f.write(".")
             pwr -= 1
-
+            
         print(test_pi, "\n", math.pi - math.pi % 10**pwr, sep = "")
         print(test_pi == math.pi - math.pi % 10**pwr)
         

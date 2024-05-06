@@ -1,6 +1,7 @@
 from __future__ import annotations
 import csv
 import os
+import pickle
 
 class Etudiant :
     @classmethod
@@ -120,9 +121,24 @@ class Groupe :
                 new_gr.addEtu(Etudiant.from_dict(row))
 
         return new_gr
+    
+    @classmethod
+    def loadFromBin(cls, file) :
+        if not os.path.isfile(file) :
+            raise ValueError("Impossible de trouver le fichier.")
+        
+        new_gr = Groupe(file)
+        with open(file, "rb") as f:
+            list_et = pickle.load(f)
+
+        for etu in list_et :
+            new_gr.addEtu(etu)
+
+        return new_gr
+        
 
 
-    def __init__(self, file = "Etu.csv") :
+    def __init__(self, file = "Etu") :
         self._etu = []
         self.file = file
 
@@ -139,15 +155,15 @@ class Groupe :
 
     @property
     def file(self) :
-        return self._file
+        return self._file + (".csv" if (self._file[-4:] != ".csv") else "")
+    
+    @property
+    def file_bin(self) :
+        return self._file + (".bin" if (self._file[-4:] != ".bin") else "")
     
     @file.setter
     def file(self, val) :
-        val = str(val)
-        if val[-4:] != ".csv" :
-            val += ".csv"
-
-        self._file = val
+        self._file = str(val)
 
     def sauvegarder_csv(self) :
         with open(self.file, "w", newline = "") as f :
@@ -157,26 +173,38 @@ class Groupe :
             writer.writeheader()
             for student in self.etu :
                 writer.writerow(student.to_dict())
+
+    def sauvegarderBin(self) :
+        with open(self.file_bin, "wb") as f:
+            pickle.dump(self.etu, f)
+
             
-
-
 
 def main() :
     etu1 = Etudiant("RR", 2005, 5, True)
-    etu2 = Etudiant("AP", 2005, 5, False)
+    etu2 = Etudiant("AP", 2005, 5, True)
+
     list_et = Groupe()
     list_et.addEtu(etu1)
     list_et.addEtu(etu2)
 
     print(list_et.file)
     list_et.sauvegarder_csv()
+    list_et.sauvegarderBin()
     
     print("L1")
     for etu in list_et.etu :
         print(etu)
 
     list_etu_2 = Groupe.charger_csv("Etu.csv")
+    list_etu_3 = Groupe.loadFromBin("Etu.bin")
+
+    print("L2: ")
     for etu in list_etu_2.etu :
+        print(etu)
+
+    print("L3: ")
+    for etu in list_etu_3.etu :
         print(etu)
 
 if __name__ == "__main__" :
