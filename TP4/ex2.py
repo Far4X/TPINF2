@@ -1,7 +1,6 @@
 from __future__ import annotations
 import csv
 import os
-import pickle
 import control
 
 class Etudiant :
@@ -50,19 +49,19 @@ class Etudiant :
         self.connais_python = connais_python
 
     @property
-    def nom(self) :
+    def nom(self) -> str:
         return self._name
     
     @nom.setter
-    def nom(self, val) :
+    def nom(self, val : str | object) -> None :
         self._name = str(val)
 
     @property
-    def annee_de_naissance(self) :
+    def annee_de_naissance(self) -> int :
         return self._bday
     
     @annee_de_naissance.setter
-    def annee_de_naissance(self, val) :
+    def annee_de_naissance(self, val : int) -> None:
         if type(val) == int :
             if val > 1900 and val < 2025 :
                 self._bday = val
@@ -72,11 +71,11 @@ class Etudiant :
             raise TypeError("Type de l'année non valide. Entier.")
         
     @property
-    def gpa(self) :
+    def gpa(self) -> float:
         return self._gpa
     
     @gpa.setter
-    def gpa(self, val) :
+    def gpa(self, val : float | int) -> None:
         if type(val) == float or type(val) == int :
             if val >= 0 and val <= 5 :
                 self._gpa = val
@@ -86,11 +85,11 @@ class Etudiant :
             raise TypeError("Type du GPA non valide. Entier.")
         
     @property
-    def connais_python(self) :
+    def connais_python(self) -> bool:
         return self._knpy
     
     @connais_python.setter
-    def connais_python(self, val) :
+    def connais_python(self, val : bool) :
         if isinstance(val, bool) :
             self._knpy = val
         else :
@@ -110,7 +109,7 @@ class Etudiant :
 
 class Groupe :
     @classmethod
-    def charger(cls, file) :
+    def charger(cls, file : str) -> Groupe :
         if not os.path.isfile(file) :
             raise ValueError("Impossible de trouver le fichier.")
         
@@ -123,7 +122,7 @@ class Groupe :
         return new_gr
     
 
-    def __init__(self, file = "Etu") :
+    def __init__(self, file : str = "Etu") -> None :
         self._etu = []
         self.file = file
 
@@ -131,7 +130,7 @@ class Groupe :
     def etu(self) -> list[Etudiant]:
         return self._etu
     
-    def addEtu(self, etu) :
+    def addEtu(self, etu : Etudiant) -> None :
         if isinstance(etu, Etudiant) :
             self._etu.append(etu)
         else :
@@ -139,14 +138,14 @@ class Groupe :
         
 
     @property
-    def file(self) :
+    def file(self) -> str:
         return self._file + (".csv" if (self._file[-4:] != ".csv") else "")
     
     @file.setter
-    def file(self, val) :
+    def file(self, val : str | object) :
         self._file = str(val)
 
-    def sauvegarder(self) :
+    def sauvegarder(self) -> None :
         with open(self.file, "w", newline = "") as f :
             header = ["Nom", "Date_de_naissance", "Gpa", "Connais_python"]
             writer = csv.DictWriter(f, fieldnames=header)
@@ -156,13 +155,11 @@ class Groupe :
                 writer.writerow(student.to_dict())
             
 
-def main() :
-
+def main() -> None :
     list_et = Groupe()
     
     while control.secureAskType(int, "Continuer ? : (0/1) : ", lambda x : (x == 0 or x == 1)) :
         creerEtu(list_et)
-
 
     print(list_et.file)
     list_et.sauvegarder()
@@ -177,7 +174,7 @@ def main() :
     for etu in list_etu_2.etu :
         print(etu)
 
-def creerEtu(group : Groupe) :
+def creerEtu(group : Groupe) -> None :
     nom = control.secureAskType(str, "Entrez le nom de l'étudiant : ")
     naiss = control.secureAskType(int, "Entrez l'année de naissance de l'étudiant : ", lambda x : 1900 < x < 2025, "Vous n'avez pas entré un entier", "L'année n'est pas valide. Réessayez : ")
     gpa = control.secureAskType(float, "Entrez la gpa de l'étudiant : ", lambda x : 0 <= x <= 5,  "Vous n'avez pas entré un flottant", "La gpa n'a pas une valeur valide. Réessayez : ")
@@ -185,7 +182,6 @@ def creerEtu(group : Groupe) :
     group.addEtu(Etudiant(nom, naiss, gpa, bool(connais_python)))
 
 if __name__ == "__main__" :
-
     main()
 
 

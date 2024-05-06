@@ -19,20 +19,19 @@ class GroupeBin(ex2.Groupe) :
         return new_gr
     
     @property
-    def file(self) :
+    def file(self) -> str:
         return self._file + (".bin" if (self._file[-4:] != ".bin") else "")
     
     @file.setter
-    def file(self, val) :
+    def file(self, val : str | object) -> str :
         self._file = str(val)
 
-    def sauvegarder(self) :
+    def sauvegarder(self) -> None :
         with open(self.file, "wb") as f:
             pickle.dump(self.etu, f)
 
 
-def main() :
-
+def main() -> None:
     list_et = GroupeBin()
     
     while control.secureAskType(int, "Continuer ? : (0/1) : ", lambda x : (x == 0 or x == 1)) :
@@ -52,7 +51,8 @@ def main() :
     for etu in list_etu_2.etu :
         print(etu)
 
-def creerEtu(group : GroupeBin) :
+
+def creerEtu(group : GroupeBin) -> None :
     nom = control.secureAskType(str, "Entrez le nom de l'étudiant : ")
     naiss = control.secureAskType(int, "Entrez l'année de naissance de l'étudiant : ", lambda x : 1900 < x < 2025, "Vous n'avez pas entré un entier", "L'année n'est pas valide. Réessayez : ")
     gpa = control.secureAskType(float, "Entrez la gpa de l'étudiant : ", lambda x : 0 <= x <= 5,  "Vous n'avez pas entré un flottant", "La gpa n'a pas une valeur valide. Réessayez : ")
@@ -64,8 +64,11 @@ if __name__ == "__main__" :
 
 
 """Ici, le mode texte nous permet de pouvoir visualiser les données sans utiliser directement le programme.
+On peut donc également plus facilement les exploiter avec un autre programme.
 Le mode binaire permet, au contraire, de passer obligatoirement le programme. Cela peut être utile lorsque l'on veut
 obfusquer l'accès aux données.
 
 Le mode binaire permet plus facilement de stocker des données complexes, comme par exemple un arbre binaire de recherche
-qu'il est plus dur, de part leur nature, d'enregistrer."""
+qu'il est plus dur, de part leur nature, d'enregistrer sous forme textuelle.
+Le mode binaire peut, dans le cas d'une mauvaise optimisation lors de l'utilisation des fichiers texte, se révéler plus
+économe en stockage. De plus, la lecture en binaire peut parfois être plus rapide que celle en clair."""
