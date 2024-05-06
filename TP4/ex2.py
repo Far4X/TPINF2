@@ -8,8 +8,6 @@ class Etudiant :
     def from_dict(cls, values) -> Etudiant:
         if type(values) != dict :
             raise TypeError("Vous n'avez pas entré un dictionnaire.")
-
-        #Tres bon code, je t'offre 100000€
     
         nom = dict.get(values, "Nom", None)
         annee = dict.get(values, "Date_de_naissance", None)
@@ -211,3 +209,11 @@ def main() :
 
 if __name__ == "__main__" :
     main()
+
+
+"""Ici, le mode texte nous permet de pouvoir visualiser les données sans utiliser directement le programme.
+Le mode binaire permet, au contraire, de passer obligatoirement le programme. Cela peut être utile lorsque l'on veut
+obfusquer l'accès aux données.
+
+Le mode binaire permet plus facilement de stocker des données complexes, comme par exemple un arbre binaire de recherche
+qu'il est plus dur, de part leur nature, d'enregistrer."""
