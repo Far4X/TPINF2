@@ -2,6 +2,7 @@ import ex2
 import os
 import pickle
 import control
+import functiontools
 
 class GroupeBin(ex2.Groupe) :
     @classmethod
@@ -28,29 +29,36 @@ class GroupeBin(ex2.Groupe) :
 
     def sauvegarder(self) -> None :
         with open(self.file, "wb") as f:
-            pickle.dump(self.etu, f)
+            pickle.dump(self.list_etu, f)
 
 
-def main() -> None:
-    list_et = GroupeBin()
+def main() -> None :
+    list_groupes = []
+    creerGroupep = functiontools.PrintableFunction(creerGroupe, "Créer un groupe", list_groupes)
+    printGroups = functiontools.PrintableFunction(printListGroupes, "Afficher la liste des groupes", list_groupes)
+    saveAGroupPrintable = functiontools.PrintableFunction(saveAGroup, "Sauvegarder un groupe", list_groupes)
+    loadAGroup = functiontools.PrintableFunction(loadFile, "Charger un groupe dans un fichier", list_groupes)
+    quit_b = functiontools.PrintableFunction(quit, "Quitter")
+
+
+    list_act = [quit_b, creerGroupep, printGroups, saveAGroupPrintable, loadAGroup]
+
+    while 1 :
+        ans = control.secureDisplayAndPick(list_act)
+        ans()
+
+
+def creerGroupe(list_groups : list[GroupeBin]) :
+    list_et = GroupeBin(control.secureAskType(str, "Nom du fichier : "))
     
-    while control.secureAskType(int, "Continuer ? : (0/1) : ", lambda x : (x == 0 or x == 1)) :
+    while control.secureAskType(int, "Voulez vous ajouter un nouvel étudiant ? : (0/1) : ", lambda x : (x == 0 or x == 1)) :
         creerEtu(list_et)
 
+    list_groups.append(list_et)
 
-    print(list_et.file)
-    list_et.sauvegarder()
-    
-    print("L1")
-    for etu in list_et.etu :
-        print(etu)
-
-    list_etu_2 = GroupeBin.charger("Etu.bin")
-
-    print("L2: ")
-    for etu in list_etu_2.etu :
-        print(etu)
-
+def printListGroupes(list_groups : list[GroupeBin]) :
+    for group in list_groups :
+        print(group)
 
 def creerEtu(group : GroupeBin) -> None :
     nom = control.secureAskType(str, "Entrez le nom de l'étudiant : ")
@@ -58,6 +66,21 @@ def creerEtu(group : GroupeBin) -> None :
     gpa = control.secureAskType(float, "Entrez la gpa de l'étudiant : ", lambda x : 0 <= x <= 5,  "Vous n'avez pas entré un flottant", "La gpa n'a pas une valeur valide. Réessayez : ")
     connais_python = control.secureAskType(int, "L'étudiant connait-il python ? (0/1) : ", lambda x : (x == 0 or x == 1))
     group.addEtu(ex2.Etudiant(nom, naiss, gpa, bool(connais_python)))
+
+
+def loadFile(list_gr : list[GroupeBin]) :
+    path = control.secureAskType(str, "Entrez le nom du fichier : ")
+    try : 
+        list_gr.append(GroupeBin.charger(path))
+        print("Groupe chargé")
+    except ValueError as e:
+        print(f"Erreur : {e}")
+
+def saveAGroup(list_gr : list[GroupeBin]) :
+    gr = control.secureDisplayAndPick(list_gr, "Sélectionnez le groupe à enregistrer : ", 1)
+    gr.sauvegarder()
+    print("Groupe sauvegardé")
+
 
 if __name__ == "__main__" :
     main()

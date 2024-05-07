@@ -13,7 +13,7 @@ def secureAskType(target_type : typing.Callable, text : str | None  = None, cond
     if not callable(condition) :
         raise TypeError("La condition entrée n'est pas valide.")
     if text == None :
-        text = f"Entrez quelque chose de type {type}"
+        text = f"Entrez quelque chose de type {type} : "
     input_v = input(text)
     cont = True
     while (cont) :
@@ -26,7 +26,6 @@ def secureAskType(target_type : typing.Callable, text : str | None  = None, cond
                 cont = False
             else :
                 input_v = input(msg_unvalid_value)
-
  
     return input_v
         

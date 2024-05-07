@@ -2,6 +2,7 @@ from __future__ import annotations
 import csv
 import os
 import control
+import functiontools
 
 class Etudiant :
     @classmethod
@@ -104,7 +105,7 @@ class Etudiant :
         return dct
     
     def __str__(self) :
-        return f"Nom : {self.nom}, né(e) en {self.annee_de_naissance}, avec une GPA de {self.gpa}. {"Connait le python" if self.connais_python else "Ne connait pas le python"}"
+        return f"Nom : {self.nom}, né(e) en {self.annee_de_naissance}, avec une GPA de {self.gpa}. {"Connait le python." if self.connais_python else "Ne connait pas le python."}"
     
 
 class Groupe :
@@ -114,7 +115,7 @@ class Groupe :
             raise ValueError("Impossible de trouver le fichier.")
         
         new_gr = Groupe(file)
-        with open(file, "r", newline="") as f:
+        with open(file, "r", newline="", encoding="UTF-8") as f:
             reader = csv.DictReader(f)
             for row in reader :
                 new_gr.addEtu(Etudiant.from_dict(row))
@@ -126,8 +127,15 @@ class Groupe :
         self._etu = []
         self.file = file
 
+    def __str__(self) :
+        list_etu_str = ""
+        for etu in self.list_etu :
+            list_etu_str += str(etu) + "\n"
+        
+        return f"Groupe dont le fichier de sauvegarde est {self.file}.Liste des étudiants : \n{list_etu_str}"
+
     @property
-    def etu(self) -> list[Etudiant]:
+    def list_etu(self) -> list[Etudiant]:
         return self._etu
     
     def addEtu(self, etu : Etudiant) -> None :
@@ -151,28 +159,37 @@ class Groupe :
             writer = csv.DictWriter(f, fieldnames=header)
 
             writer.writeheader()
-            for student in self.etu :
+            for student in self.list_etu :
                 writer.writerow(student.to_dict())
             
 
 def main() -> None :
-    list_et = Groupe()
+    list_groupes = []
+    creerGroupep = functiontools.PrintableFunction(creerGroupe, "Créer un groupe", list_groupes)
+    printGroups = functiontools.PrintableFunction(printListGroupes, "Afficher la liste des groupes", list_groupes)
+    saveAGroupPrintable = functiontools.PrintableFunction(saveAGroup, "Sauvegarder un groupe", list_groupes)
+    loadAGroup = functiontools.PrintableFunction(loadFile, "Charger un groupe dans un fichier", list_groupes)
+    quit_b = functiontools.PrintableFunction(quit, "Quitter")
+
+
+    list_act = [quit_b, creerGroupep, printGroups, saveAGroupPrintable, loadAGroup]
+
+    while 1 :
+        ans = control.secureDisplayAndPick(list_act)
+        ans()
+
+
+def creerGroupe(list_groups : list[Groupe]) :
+    list_et = Groupe(control.secureAskType(str, "Nom du fichier : "))
     
-    while control.secureAskType(int, "Continuer ? : (0/1) : ", lambda x : (x == 0 or x == 1)) :
+    while control.secureAskType(int, "Voulez vous ajouter un nouvel étudiant ? : (0/1) : ", lambda x : (x == 0 or x == 1)) :
         creerEtu(list_et)
 
-    print(list_et.file)
-    list_et.sauvegarder()
-    
-    print("L1")
-    for etu in list_et.etu :
-        print(etu)
+    list_groups.append(list_et)
 
-    list_etu_2 = Groupe.charger("Etu.csv")
-
-    print("L2: ")
-    for etu in list_etu_2.etu :
-        print(etu)
+def printListGroupes(list_groups : list[Groupe]) :
+    for group in list_groups :
+        print(group)
 
 def creerEtu(group : Groupe) -> None :
     nom = control.secureAskType(str, "Entrez le nom de l'étudiant : ")
@@ -181,7 +198,20 @@ def creerEtu(group : Groupe) -> None :
     connais_python = control.secureAskType(int, "L'étudiant connait-il python ? (0/1) : ", lambda x : (x == 0 or x == 1))
     group.addEtu(Etudiant(nom, naiss, gpa, bool(connais_python)))
 
+
+def loadFile(list_gr : list[Groupe]) :
+    path = control.secureAskType(str, "Entrez le nom du fichier : ")
+    try : 
+        list_gr.append(Groupe.charger(path))
+        print("Groupe chargé")
+    except ValueError as e:
+        print(f"Erreur : {e}")
+
+def saveAGroup(list_gr : list[Groupe]) :
+    gr = control.secureDisplayAndPick(list_gr, "Sélectionnez le groupe à enregistrer : ", 1)
+    gr.sauvegarder()
+    print("Groupe sauvegardé")
+
+
 if __name__ == "__main__" :
     main()
-
-
