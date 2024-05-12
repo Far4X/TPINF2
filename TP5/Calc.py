@@ -51,16 +51,16 @@ class Calculation :
 
         if (parenthesis_level_op != None) :
             for i in range(parenthesis_level_op) :
-                print("Here")
                 self.text_left_member = self.text_left_member.lstrip('(')
                 self.text_right_member = self.text_right_member.rstrip(')')
 
-        print(f"Output : op : {self.operation}, left member : {self.text_left_member}, right member : {self.text_right_member}")
+        #print(f"Output : op : {self.operation}, left member : {self.text_left_member}, right member : {self.text_right_member}")
         if self.operation != "" :
             if self.text_right_member != "" :
                 self.right_member = Calculation(self.text_right_member)
             if self.text_left_member != "" :
                 self.left_member = Calculation(self.text_left_member)
+
 
     def Calculate(self) -> float:
         match self.operation :
@@ -107,9 +107,9 @@ class Calculation :
                 return self.left_member.Calculate()*math.sqrt(self.right_member.Calculate())
             
             case "^" :
-                return self.left_member.Calculate() ** self.left_member.Calculate()
+                return self.left_member.Calculate() ** self.right_member.Calculate()
                 
-        
+    
 
 class Historal :
     def __init__(self) :
@@ -119,9 +119,17 @@ class Historal :
         self._list_op.append(op)
 
     def getOps(self, page, lenght) :
-        if lenght > len(self._list_op) :
-            return (self._list_op[-1-lenght*(page+1):-1-lenght*page])
+        if lenght < len(self._list_op) :
+            print("Here")
+            if len(self._list_op) >= (lenght*(page+1)) :
+                if page == 0 :
+                    return (self._list_op[-(lenght)*(page+1):])
+                return (self._list_op[-(lenght)*(page+1):-lenght*(page)])
+            return (self._list_op[:-lenght*(page)])
         return (self._list_op)
+    
+    def getNbPages(self, lenght) :
+        return len(self._list_op)//lenght + (1 if len(self._list_op) % lenght != 0 else 0)
 
 class CalculatriceButtonChar(tk.Button) :
     def __init__(self, parent, char, calc_host) :
@@ -136,6 +144,68 @@ class CalculatriceButtonChar(tk.Button) :
     def setChar(self, char) :
         self.config(text = char)
         self.char = char
+
+class HistoralWindow(tk.Toplevel) :
+    def __init__(self, master, historal : Historal) :
+        super().__init__(master, bg="#202030")
+        self.historal = historal
+        self.first_label = tk.Label(self, text=f"Historique - Page 1/{self.historal.getNbPages(10)}", relief="flat", bg="#5585f0")
+        self.first_label.grid(row=0, column=0, columnspan=2, padx=5, pady=5, sticky="nsew")
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+        self.num_page = 0
+        self._list_labels : tk.Label = []
+
+        for i in range(10) :
+            self._list_labels.append(tk.Label(self, relief="flat", bg="#202030", fg ="#202030", text="A"))
+            self.rowconfigure(10-i, weight=1)
+
+        self.geometry("300x450+200+200")
+
+        self.button_next = tk.Button(self, text="->", command=self.nextPage, bg="#5585f0", relief="flat")
+        self.button_prev = tk.Button(self, text="<-", command=self.prevPage, bg="#5585f0", relief="flat")
+        self.button_prev.grid(column=0, row=11, sticky="nsew", padx=5, pady=5)
+        self.button_next.grid(column=1, row=11, sticky="nsew", padx=5, pady=5)
+        self.rowconfigure(11, weight=1)
+
+        self.updatePage()
+
+    def updatePage(self) :
+        list_op = self.historal.getOps(self.num_page, 10)
+
+        if self.num_page == 0 :
+            self.button_prev.config(bg = "#2555a0")
+        elif self.num_page == 1 :
+            self.button_prev.config(bg = "#5585f0")
+
+        if self.num_page == self.historal.getNbPages(10)-1 :
+            self.button_next.config(bg = "#2555a0")
+        elif self.num_page == self.historal.getNbPages(10)-2 :
+            self.button_next.config(bg = "#5585f0")
+
+        for i in range(10) :
+            if i < len(list_op) :
+                #self._list_labels[i].config(text = list_op[i], fg = "#000000", bg = "#4065d0")
+                self._list_labels[i].config(text = list_op[i], fg = "#ffffff")
+                self._list_labels[i].grid(column = 0, row = 10-i+(len(list_op)-10), columnspan = 2, padx=5, pady=4, sticky="nsew")
+
+            else :
+                self._list_labels[i].config(fg = "#202030")
+                self._list_labels[i].grid(column = 0, row = 10-i+(+len(list_op)), columnspan = 2, padx=5, pady=4, sticky="nsew")
+
+
+        self.first_label.config(text=f"Page {self.num_page+1}/{self.historal.getNbPages(10)}")
+
+    def nextPage(self) :
+        if self.num_page < self.historal.getNbPages(10)-1 :
+            self.num_page += 1
+        self.updatePage()
+
+    def prevPage(self) :
+        if self.num_page > 0 :
+            self.num_page -= 1
+        self.updatePage()
 
 
 class Calculatrice(tk.Tk) :
@@ -201,10 +271,10 @@ class Calculatrice(tk.Tk) :
         self._txt.set("")
 
     def doCalculation(self) :
-        self.historal.opEffectued(self._txt.get())
         if not self.graph_mode :
             try :
                 self._txt.set(self._txt.get() + f" = {Calculation(self._txt.get()).Calculate()}")
+                self.historal.opEffectued(self._txt.get())
             except RecursionError:
                 self._txt.set("Opération saisie non valide")
             self.trigger_reset = True
@@ -221,7 +291,9 @@ class Calculatrice(tk.Tk) :
 
 
     def goHistoricMode(self) :
-        pass
+        HistoralWindow(self, self.historal)
+        
+        
 
 
 
