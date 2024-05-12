@@ -46,7 +46,6 @@ class Calculation :
             else :
                 self.text_left_member += char
 
-
         self.text_right_member = self.text_right_member.lstrip(self.operation)
 
         if (parenthesis_level_op != None) :
@@ -62,13 +61,19 @@ class Calculation :
                 self.left_member = Calculation(self.text_left_member)
 
 
-    def Calculate(self) -> float:
+    def Calculate(self, xval = None | float) -> float:
         match self.operation :
             case "" :
                 if self.text_left_member != "" :
-                    return float(self.text_left_member)
+                    if self.text_left_member != "x" :
+                        return float(self.text_left_member)
+                    else :
+                        return xval
                 else :
-                    return float(self.text_left_member)
+                    if self.text_right_member != "x" :
+                        return float(self.text_right_member)
+                    else :
+                        return xval
                 
             case "+" :
                 return self.right_member.Calculate() + self.left_member.Calculate()
@@ -109,7 +114,6 @@ class Calculation :
             case "^" :
                 return self.left_member.Calculate() ** self.right_member.Calculate()
                 
-    
 
 class Historal :
     def __init__(self) :
@@ -120,7 +124,6 @@ class Historal :
 
     def getOps(self, page, lenght) :
         if lenght < len(self._list_op) :
-            print("Here")
             if len(self._list_op) >= (lenght*(page+1)) :
                 if page == 0 :
                     return (self._list_op[-(lenght)*(page+1):])
@@ -130,6 +133,7 @@ class Historal :
     
     def getNbPages(self, lenght) :
         return len(self._list_op)//lenght + (1 if len(self._list_op) % lenght != 0 else 0)
+    
 
 class CalculatriceButtonChar(tk.Button) :
     def __init__(self, parent, char, calc_host) :
@@ -207,6 +211,78 @@ class HistoralWindow(tk.Toplevel) :
             self.num_page -= 1
         self.updatePage()
 
+class GraphWindow(tk.Toplevel) :
+    def __init__(self, master, function) :
+        super().__init__(master, bg="#202030")
+        self.function = function
+        self.canevas = tk.Canvas(self, bg = "#666666", highlightthickness=0)
+        self.canevas.grid(row = 0, column = 0, columnspan= 4, padx=2, pady=2)
+
+        self.top_left = [-5, 5]
+        self.size_graph = [10, -10]
+
+        self.step_mv = [0.5, 0.5]
+        self.graduations = [1, 1]
+        self.stepx = [0.01]
+
+        self.button_options = tk.Button(self, text="Options", command=self.openOptionWindow, bg = "#4065d0", relief="flat")
+        self.button_go_right = tk.Button(self, text=">", command=self.goRight, bg = "#5585f0", relief="flat")
+        self.button_go_left = tk.Button(self, text="<", command=self.goLeft, bg = "#5585f0", relief="flat")
+        self.button_go_up = tk.Button(self, text="     ^     ", command=self.goUp, bg = "#5585f0", relief="flat")
+        self.button_go_down = tk.Button(self, text="     v     ", command=self.goDown, bg = "#5585f0", relief="flat")
+        self.button_zoom_in = tk.Button(self, text="Zoom +", command=self.zoomIn, bg = "#4065d0", relief="flat")
+        self.button_zoom_out = tk.Button(self, text="Zoom -", command=self.zoomOut, bg = "#4065d0", relief="flat")
+
+
+        self.button_options.grid(row = 1, column=0, rowspan=2, padx=5, pady=5, sticky="nsew")
+        self.button_go_down.grid(row = 2, column=2, padx=5, pady=5, sticky="nsew")
+        self.button_go_up.grid(row = 1, column=2, padx=5, pady=5, sticky="nsew")
+        self.button_go_left.grid(row = 2, column=1, padx=5, pady=5, sticky="nsew")
+        self.button_zoom_in.grid(row = 1, column=1, padx=5, pady=5, sticky="nsew")
+        self.button_go_right.grid(row = 2, column=3, padx=5, pady=5, sticky="nsew")
+        self.button_zoom_out.grid(row = 1, column=3, padx=5, pady=5, sticky="nsew")
+
+        for i in range(4) :
+            self.columnconfigure(i, weight=1)
+            if i < 3 :
+                self.rowconfigure(i, weight=1)
+
+
+
+    def openOptionWindow(self) :
+        pass
+
+    def goRight(self) :
+        self.top_left[0] += self.step_mv[0]
+
+    def goLeft(self) :
+        self.top_left[0] -= self.step_mv[0]
+
+    def goUp(self) :
+        self.top_left[1] += self.step_mv[1]
+
+    def goDown(self) :
+        self.top_left[0] -= self.step_mv[1]
+
+    def zoomIn(self) :
+        self.top_left[0] = - 1/math.sqrt(2) * self.size_graph[0] / 2 + self.size_graph[0] / 2 + self.top_left[0]
+        self.top_left[1] = - 1/math.sqrt(2) * self.size_graph[1] / 2 + self.size_graph[1] / 2 + self.top_left[1]
+
+        self.size_graph[0] *= 1/math.sqrt(2)
+        self.size_graph[1] *= 1/math.sqrt(2)
+
+        print(self.size_graph, self.top_left)
+
+
+    def zoomOut(self) :
+        self.top_left[0] = - math.sqrt(2) * self.size_graph[0] / 2 + self.size_graph[0] / 2 + self.top_left[0]
+        self.top_left[1] = - math.sqrt(2) * self.size_graph[1] / 2 + self.size_graph[1] / 2 + self.top_left[1]
+
+        self.size_graph[0] *= math.sqrt(2)
+        self.size_graph[1] *= math.sqrt(2)
+
+        print(self.size_graph, self.top_left)
+
 
 class Calculatrice(tk.Tk) :
     def __init__(self, size = (400, 500)) :
@@ -272,12 +348,16 @@ class Calculatrice(tk.Tk) :
 
     def doCalculation(self) :
         if not self.graph_mode :
+            if "=" in self._txt.get() :
+                return
             try :
                 self._txt.set(self._txt.get() + f" = {Calculation(self._txt.get()).Calculate()}")
                 self.historal.opEffectued(self._txt.get())
             except RecursionError:
                 self._txt.set("Opération saisie non valide")
             self.trigger_reset = True
+        else :
+            GraphWindow(self, Calculation(self._txt.get()).Calculate)
         
     def goGraphicMode(self) :
         if not self.graph_mode :
