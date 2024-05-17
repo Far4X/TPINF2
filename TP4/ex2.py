@@ -132,7 +132,7 @@ class Groupe :
         for etu in self.list_etu :
             list_etu_str += str(etu) + "\n"
         
-        return f"Groupe dont le fichier de sauvegarde est {self.file}.Liste des étudiants : \n{list_etu_str}"
+        return f"Groupe dont le fichier de sauvegarde est {self.file}. Liste des étudiants : \n{list_etu_str}"
 
     @property
     def list_etu(self) -> list[Etudiant]:
@@ -154,7 +154,7 @@ class Groupe :
         self._file = str(val)
 
     def sauvegarder(self) -> None :
-        with open(self.file, "w", newline = "") as f :
+        with open(self.file, "w", newline = "", encoding="UTF-8") as f :
             header = ["Nom", "Date_de_naissance", "Gpa", "Connais_python"]
             writer = csv.DictWriter(f, fieldnames=header)
 

@@ -1,10 +1,11 @@
 import tkinter as tk
 import math
+import sys
 
 
 class Calculation :
     def __init__(self, text : str, x_val : float | None = None) :
-        text = text.replace("sin", "s").replace("cos", "c").replace("tan", "t").replace("sqrt", "r").replace("²", "^2").replace("pi", f"{math.pi}")
+        text = text.replace("sin", "s").replace("cos", "c").replace("tan", "t").replace("sqrt", "r").replace("²", "^2").replace("π", f"{math.pi}")
         if x_val != None :
             text = text.replace("x", x_val)
 
@@ -61,40 +62,41 @@ class Calculation :
                 self.left_member = Calculation(self.text_left_member)
 
 
-    def Calculate(self, xval = None | float) -> float:
+    def Calculate(self, xval : None | float = None) -> float:
         match self.operation :
             case "" :
                 if self.text_left_member != "" :
                     if self.text_left_member != "x" :
                         return float(self.text_left_member)
-                    else :
+                    elif xval != None :
                         return xval
+                    
                 else :
                     if self.text_right_member != "x" :
                         return float(self.text_right_member)
-                    else :
+                    elif xval != None :
                         return xval
                 
             case "+" :
-                return self.right_member.Calculate() + self.left_member.Calculate()
+                return self.right_member.Calculate(xval) + self.left_member.Calculate(xval)
             
             case "-" :
                 if self.text_left_member != "" :
-                    return self.left_member.Calculate() - self.right_member.Calculate()
-                return -self.right_member.Calculate()
+                    return self.left_member.Calculate(xval) - self.right_member.Calculate(xval)
+                return -self.right_member.Calculate(xval)
                 
             case "*" :
                 if self.text_left_member == "" :
-                    return self.right_member.Calculate()
-                return self.left_member.Calculate() * self.right_member.Calculate()
+                    return self.right_member.Calculate(xval)
+                return self.left_member.Calculate(xval) * self.right_member.Calculate(xval)
             
             case "/" :
-                return self.left_member.Calculate() / self.right_member.Calculate() 
+                return self.left_member.Calculate(xval) / self.right_member.Calculate(xval) 
 
             case "c" :
                 if self.text_left_member == "" :
-                    return math.cos(self.right_member.Calculate())
-                return  self.left_member.Calculate()*math.cos(self.right_member.Calculate())
+                    return math.cos(self.right_member.Calculate(xval))
+                return  self.left_member.Calculate(xval)*math.cos(self.right_member.Calculate(xval))
             
             case "s" :
                 if self.text_left_member == "" :
@@ -103,16 +105,18 @@ class Calculation :
             
             case "t" :
                 if self.text_left_member == "" :
-                    return math.tan(self.right_member.Calculate())
-                return  self.left_member.Calculate()*math.tan(self.right_member.Calculate())
+                    return math.tan(self.right_member.Calculate(xval))
+                return  self.left_member.Calculate(xval)*math.tan(self.right_member.Calculate(xval))
             
             case "r" :
                 if self.text_left_member == "" :
-                    return math.sqrt(self.right_member.Calculate())
-                return self.left_member.Calculate()*math.sqrt(self.right_member.Calculate())
+                    return math.sqrt(self.right_member.Calculate(xval))
+                return self.left_member.Calculate(xval)*math.sqrt(self.right_member.Calculate(xval))
             
             case "^" :
-                return self.left_member.Calculate() ** self.right_member.Calculate()
+                return self.left_member.Calculate(xval) ** self.right_member.Calculate(xval)
+            
+        print("Err",self.operation, self.text_left_member, self.text_right_member)
                 
 
 class Historal :
@@ -215,15 +219,15 @@ class GraphWindow(tk.Toplevel) :
     def __init__(self, master, function) :
         super().__init__(master, bg="#202030")
         self.function = function
-        self.canevas = tk.Canvas(self, bg = "#666666", highlightthickness=0)
+        self.canevas = tk.Canvas(self, bg = "#dddddd", highlightthickness=0, height=200, width=300)
         self.canevas.grid(row = 0, column = 0, columnspan= 4, padx=2, pady=2)
 
         self.top_left = [-5, 5]
-        self.size_graph = [10, -10]
+        self.size_graph = [10, -20/3]
 
         self.step_mv = [0.5, 0.5]
         self.graduations = [1, 1]
-        self.stepx = [0.01]
+        self.stepx = 0.01
 
         self.button_options = tk.Button(self, text="Options", command=self.openOptionWindow, bg = "#4065d0", relief="flat")
         self.button_go_right = tk.Button(self, text=">", command=self.goRight, bg = "#5585f0", relief="flat")
@@ -247,6 +251,8 @@ class GraphWindow(tk.Toplevel) :
             if i < 3 :
                 self.rowconfigure(i, weight=1)
 
+        self.drawGraph()
+
 
 
     def openOptionWindow(self) :
@@ -254,15 +260,19 @@ class GraphWindow(tk.Toplevel) :
 
     def goRight(self) :
         self.top_left[0] += self.step_mv[0]
+        self.drawGraph()
 
     def goLeft(self) :
         self.top_left[0] -= self.step_mv[0]
+        self.drawGraph()
 
     def goUp(self) :
         self.top_left[1] += self.step_mv[1]
+        self.drawGraph()
 
     def goDown(self) :
-        self.top_left[0] -= self.step_mv[1]
+        self.top_left[1] -= self.step_mv[1]
+        self.drawGraph()
 
     def zoomIn(self) :
         self.top_left[0] = - 1/math.sqrt(2) * self.size_graph[0] / 2 + self.size_graph[0] / 2 + self.top_left[0]
@@ -271,7 +281,7 @@ class GraphWindow(tk.Toplevel) :
         self.size_graph[0] *= 1/math.sqrt(2)
         self.size_graph[1] *= 1/math.sqrt(2)
 
-        print(self.size_graph, self.top_left)
+        self.drawGraph()
 
 
     def zoomOut(self) :
@@ -281,12 +291,63 @@ class GraphWindow(tk.Toplevel) :
         self.size_graph[0] *= math.sqrt(2)
         self.size_graph[1] *= math.sqrt(2)
 
-        print(self.size_graph, self.top_left)
+        self.drawGraph()
+
+    def translateCoords(self, coords) :
+        return (((coords[0] - self.top_left[0]) / self.size_graph[0]) * 300, ((coords[1] - self.top_left[1]) / self.size_graph[1]) * 200)
+
+
+    def drawGraduations(self) :
+        x = self.top_left[0] // self.graduations[0]
+
+        while x < self.top_left[0] + self.size_graph[0] :
+            g = self.translateCoords((x, 0))
+            self.canevas.create_line(g[0], g[1]-3, g[0], g[1]+3)
+            x += self.graduations[0]
+
+        y = self.top_left[1] // self.graduations[1]
+
+        while y > self.top_left[1] + self.size_graph[1] :
+            g = self.translateCoords((0, y))
+            self.canevas.create_line(g[0]-3, g[1], g[0]+3, g[1])
+            y -= self.graduations[1]
+        
+
+    def drawGraph(self) :
+        self.canevas.delete("all")
+        ox1 = self.translateCoords((0, self.top_left[1]))
+        ox2 = self.translateCoords((0, self.top_left[1] + self.size_graph[1]))
+        oy1 = self.translateCoords((self.top_left[0], 0))
+        oy2 = self.translateCoords((self.top_left[0] + self.size_graph[0], 0))
+
+        self.canevas.create_line(ox1[0], ox1[1], ox2[0], ox2[1])
+        self.canevas.create_line(oy1[0], oy1[1], oy2[0], oy2[1])
+        
+        self.drawGraduations()
+
+        prev = None
+        current_x = float(self.top_left[0])
+        while current_x < self.size_graph[0] + self.top_left[0] :
+            try :
+                val = self.function(current_x)
+            except ZeroDivisionError :
+                val = None
+
+            if prev != None and val != None:
+                p1 = self.translateCoords(((current_x - self.stepx), prev))
+                p2 = self.translateCoords((current_x, val))
+                self.canevas.create_line(p1[0], p1[1], p2[0], p2[1])
+                #self.canevas.create_line((((current_x - self.stepx) - self.top_left[0]) / self.size_graph[0]) * 300, ((prev - self.top_left[1]) / self.size_graph[1]) * 200, (((current_x) - self.top_left[0]) / self.size_graph[0]) * 300, ((val - self.top_left[1]) / self.size_graph[1]) * 200)
+            prev = val
+            current_x += self.stepx
+
+
 
 
 class Calculatrice(tk.Tk) :
     def __init__(self, size = (400, 500)) :
         tk.Tk.__init__(self)
+        self.title("Calculatrice")
         self.graph_mode = False
         self.trigger_reset = False
         self._txt = tk.StringVar()
@@ -305,7 +366,7 @@ class Calculatrice(tk.Tk) :
         self.separator.grid(row = 1, column = 0, columnspan= 5, sticky="ew")
         self.separator.columnconfigure(0, weight=1)
 
-        list_btns_char =   [("cos", 2, 0), ("sin", 2, 1), ("tan", 2, 2), ('pi', 2, 3), ('sqrt', 2, 4),
+        list_btns_char =   [("cos", 2, 0), ("sin", 2, 1), ("tan", 2, 2), ('π', 2, 3), ('sqrt', 2, 4),
                             (1, 3, 0),     (2, 3, 1),     (3, 3, 2),     ('+', 3, 3),  ('^', 3, 4),
                             (4, 4, 0),     (5, 4, 1),     (6, 4, 2),     ('-', 4, 3),  ('(', 4, 4),
                             (7, 5, 0),     (8, 5, 1),     (9, 5, 2),     ('*', 5, 3),  (')', 5, 4),
