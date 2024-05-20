@@ -4,10 +4,19 @@ import sys
 
 
 class Calculation :
-    def __init__(self, text : str, x_val : float | None = None) :
-        text = text.replace("sin", "s").replace("cos", "c").replace("tan", "t").replace("sqrt", "r").replace("²", "^2").replace("π", f"{math.pi}")
-        if x_val != None :
-            text = text.replace("x", x_val)
+    def __init__(self, text : str) :
+        text = text.replace("sin", "s").replace("cos", "c").replace("tan", "t").replace("sqrt", "r").replace("²", "^2")
+        while "π" in text :
+            pi_index = text.index("π")
+            if pi_index > 0 :
+                if (text[pi_index - 1] in "x0123456789") :
+                  text = text.replace("π", f"*{math.pi}", 1)
+                else :  
+                    text = text.replace("π", str(math.pi), 1)
+
+            else :
+                text = text.replace("π", str(math.pi), 1)
+
 
         self.text_left_member = ""
         self.text_right_member = ""
@@ -66,14 +75,14 @@ class Calculation :
         match self.operation :
             case "" :
                 if self.text_left_member != "" :
-                    if self.text_left_member != "x" :
-                        return float(self.text_left_member)
+                    if self.text_left_member.strip("()") != "x" :
+                        return float(self.text_left_member.strip("()"))
                     elif xval != None :
                         return xval
                     
                 else :
-                    if self.text_right_member != "x" :
-                        return float(self.text_right_member)
+                    if self.text_right_member.strip("()") != "x" :
+                        return float(self.text_right_member.strip("()"))
                     elif xval != None :
                         return xval
                 
@@ -100,8 +109,8 @@ class Calculation :
             
             case "s" :
                 if self.text_left_member == "" :
-                    return math.sin(self.right_member.Calculate())
-                return  self.left_member.Calculate()*math.sin(self.right_member.Calculate())
+                    return math.sin(self.right_member.Calculate(xval))
+                return  self.left_member.Calculate(xval)*math.sin(self.right_member.Calculate(xval))
             
             case "t" :
                 if self.text_left_member == "" :
@@ -116,7 +125,7 @@ class Calculation :
             case "^" :
                 return self.left_member.Calculate(xval) ** self.right_member.Calculate(xval)
             
-        print("Err",self.operation, self.text_left_member, self.text_right_member)
+        print("Err",self.operation, self.text_left_member, self.text_right_member, xval)
                 
 
 class Historal :
@@ -435,8 +444,6 @@ class Calculatrice(tk.Tk) :
         HistoralWindow(self, self.historal)
         
         
-
-
 
 def main() :
     calc = Calculatrice()
