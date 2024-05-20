@@ -1,10 +1,11 @@
 import tkinter as tk
 import math
-import sys
+from __future__ import annotations
+import typing
 
 
 class Calculation :
-    def __init__(self, text : str) :
+    def __init__(self, text : str) -> None:
         text = text.replace("sin", "s").replace("cos", "c").replace("tan", "t").replace("sqrt", "r").replace("²", "^2")
         while "π" in text :
             pi_index = text.index("π")
@@ -129,13 +130,13 @@ class Calculation :
                 
 
 class Historal :
-    def __init__(self) :
+    def __init__(self) -> None:
         self._list_op = []
 
     def opEffectued(self, op : str) :
         self._list_op.append(op)
 
-    def getOps(self, page, lenght) :
+    def getOps(self, page : int, lenght : int) -> tuple[int]:
         if lenght < len(self._list_op) :
             if len(self._list_op) >= (lenght*(page+1)) :
                 if page == 0 :
@@ -144,12 +145,12 @@ class Historal :
             return (self._list_op[:-lenght*(page)])
         return (self._list_op)
     
-    def getNbPages(self, lenght) :
+    def getNbPages(self, lenght : int) -> int :
         return len(self._list_op)//lenght + (1 if len(self._list_op) % lenght != 0 else 0)
     
 
 class CalculatriceButtonChar(tk.Button) :
-    def __init__(self, parent, char, calc_host) :
+    def __init__(self, parent : tk.Frame | tk.Tk, char : str, calc_host : Calculatrice) -> None :
         tk.Button.__init__(self, parent, command=self.clickedOn, text=char, background = ("#909090" if str(char) not in "0123456789" else "#aaa"), relief="flat")
         self.parent : tk.Frame = parent
         self.calc_host : Calculatrice = calc_host
@@ -163,10 +164,10 @@ class CalculatriceButtonChar(tk.Button) :
         self.char = char
 
 class HistoralWindow(tk.Toplevel) :
-    def __init__(self, master, historal : Historal) :
+    def __init__(self, master : Calculatrice, historal : Historal) -> None :
         super().__init__(master, bg="#202030")
-        self.historal = historal
-        self.first_label = tk.Label(self, text=f"Historique - Page 1/{self.historal.getNbPages(10)}", relief="flat", bg="#5585f0")
+        self._historal = historal
+        self.first_label = tk.Label(self, text=f"Historique - Page 1/{self._historal.getNbPages(10)}", relief="flat", bg="#5585f0")
         self.first_label.grid(row=0, column=0, columnspan=2, padx=5, pady=5, sticky="nsew")
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -188,17 +189,17 @@ class HistoralWindow(tk.Toplevel) :
 
         self.updatePage()
 
-    def updatePage(self) :
-        list_op = self.historal.getOps(self.num_page, 10)
+    def updatePage(self) -> None:
+        list_op = self._historal.getOps(self.num_page, 10)
 
         if self.num_page == 0 :
             self.button_prev.config(bg = "#2555a0")
         elif self.num_page == 1 :
             self.button_prev.config(bg = "#5585f0")
 
-        if self.num_page == self.historal.getNbPages(10)-1 :
+        if self.num_page == self._historal.getNbPages(10)-1 :
             self.button_next.config(bg = "#2555a0")
-        elif self.num_page == self.historal.getNbPages(10)-2 :
+        elif self.num_page == self._historal.getNbPages(10)-2 :
             self.button_next.config(bg = "#5585f0")
 
         for i in range(10) :
@@ -212,10 +213,10 @@ class HistoralWindow(tk.Toplevel) :
                 self._list_labels[i].grid(column = 0, row = 10-i+(+len(list_op)), columnspan = 2, padx=5, pady=4, sticky="nsew")
 
 
-        self.first_label.config(text=f"Page {self.num_page+1}/{self.historal.getNbPages(10)}")
+        self.first_label.config(text=f"Page {self.num_page+1}/{self._historal.getNbPages(10)}")
 
     def nextPage(self) :
-        if self.num_page < self.historal.getNbPages(10)-1 :
+        if self.num_page < self._historal.getNbPages(10)-1 :
             self.num_page += 1
         self.updatePage()
 
@@ -225,9 +226,9 @@ class HistoralWindow(tk.Toplevel) :
         self.updatePage()
 
 class GraphWindow(tk.Toplevel) :
-    def __init__(self, master, function) :
+    def __init__(self, master : Calculatrice, function : typing.Callable) -> None :
         super().__init__(master, bg="#202030")
-        self.function = function
+        self._function = function
         self.canevas = tk.Canvas(self, bg = "#dddddd", highlightthickness=0, height=200, width=300)
         self.canevas.grid(row = 0, column = 0, columnspan= 4, padx=2, pady=2)
 
@@ -264,26 +265,26 @@ class GraphWindow(tk.Toplevel) :
 
 
 
-    def openOptionWindow(self) :
+    def openOptionWindow(self) -> None:
         pass
 
-    def goRight(self) :
+    def goRight(self) -> None :
         self.top_left[0] += self.step_mv[0]
         self.drawGraph()
 
-    def goLeft(self) :
+    def goLeft(self) -> None :
         self.top_left[0] -= self.step_mv[0]
         self.drawGraph()
 
-    def goUp(self) :
+    def goUp(self) -> None:
         self.top_left[1] += self.step_mv[1]
         self.drawGraph()
 
-    def goDown(self) :
+    def goDown(self) -> None :
         self.top_left[1] -= self.step_mv[1]
         self.drawGraph()
 
-    def zoomIn(self) :
+    def zoomIn(self) -> None :
         self.top_left[0] = - 1/math.sqrt(2) * self.size_graph[0] / 2 + self.size_graph[0] / 2 + self.top_left[0]
         self.top_left[1] = - 1/math.sqrt(2) * self.size_graph[1] / 2 + self.size_graph[1] / 2 + self.top_left[1]
 
@@ -293,7 +294,7 @@ class GraphWindow(tk.Toplevel) :
         self.drawGraph()
 
 
-    def zoomOut(self) :
+    def zoomOut(self) -> None :
         self.top_left[0] = - math.sqrt(2) * self.size_graph[0] / 2 + self.size_graph[0] / 2 + self.top_left[0]
         self.top_left[1] = - math.sqrt(2) * self.size_graph[1] / 2 + self.size_graph[1] / 2 + self.top_left[1]
 
@@ -302,11 +303,11 @@ class GraphWindow(tk.Toplevel) :
 
         self.drawGraph()
 
-    def translateCoords(self, coords) :
+    def translateCoords(self, coords : tuple[int]) -> tuple[int] :
         return (((coords[0] - self.top_left[0]) / self.size_graph[0]) * 300, ((coords[1] - self.top_left[1]) / self.size_graph[1]) * 200)
 
 
-    def drawGraduations(self) :
+    def drawGraduations(self) -> None :
         x = self.top_left[0] // self.graduations[0]
 
         while x < self.top_left[0] + self.size_graph[0] :
@@ -322,7 +323,7 @@ class GraphWindow(tk.Toplevel) :
             y -= self.graduations[1]
         
 
-    def drawGraph(self) :
+    def drawGraph(self) -> None :
         self.canevas.delete("all")
         ox1 = self.translateCoords((0, self.top_left[1]))
         ox2 = self.translateCoords((0, self.top_left[1] + self.size_graph[1]))
@@ -338,7 +339,7 @@ class GraphWindow(tk.Toplevel) :
         current_x = float(self.top_left[0])
         while current_x < self.size_graph[0] + self.top_left[0] :
             try :
-                val = self.function(current_x)
+                val = self._function(current_x)
             except ZeroDivisionError :
                 val = None
 
@@ -354,13 +355,13 @@ class GraphWindow(tk.Toplevel) :
 
 
 class Calculatrice(tk.Tk) :
-    def __init__(self, size = (400, 500)) :
+    def __init__(self, size = (400, 500)) -> None :
         tk.Tk.__init__(self)
         self.title("Calculatrice")
         self.graph_mode = False
-        self.trigger_reset = False
+        self._trigger_reset = False
         self._txt = tk.StringVar()
-        self.historal = Historal()
+        self._historal = Historal()
         #self.config()
         self.geometry(f"{size[0]}x{size[1]}+100+100")
         self.frame = tk.Frame(self, padx= 20, pady=20, bg = "#202030")
@@ -406,30 +407,37 @@ class Calculatrice(tk.Tk) :
         self.clear_button.grid(row = 7, column = 0, padx=5, pady=5, sticky="nsew", columnspan=1)       
 
 
-    def addChar(self, char) :
-        if not self.trigger_reset :
+    def addChar(self, char : str) -> None:
+        if not self._trigger_reset :
             self._txt.set(self._txt.get() + char)
         else :
             self._txt.set(char)
-            self.trigger_reset = False
+            self._trigger_reset = False
 
-    def clearArea(self) :
-        self._txt.set("")
+    def clearArea(self) -> None:
+        if not self.graph_mode :
+            self._txt.set("")
+        else :
+            self._txt.set("y = ")
 
-    def doCalculation(self) :
+
+
+    def doCalculation(self) -> None:
         if not self.graph_mode :
             if "=" in self._txt.get() :
                 return
             try :
                 self._txt.set(self._txt.get() + f" = {Calculation(self._txt.get()).Calculate()}")
-                self.historal.opEffectued(self._txt.get())
+                self._historal.opEffectued(self._txt.get())
             except RecursionError:
                 self._txt.set("Opération saisie non valide")
-            self.trigger_reset = True
+            
         else :
             GraphWindow(self, Calculation(self._txt.get()).Calculate)
+
+        self._trigger_reset = True
         
-    def goGraphicMode(self) :
+    def goGraphicMode(self) -> None:
         if not self.graph_mode :
             self.graph_mode = True
             self.graphic_mode_button.configure(bg="#209010")
@@ -438,10 +446,12 @@ class Calculatrice(tk.Tk) :
             self.graph_mode = False
             self.graphic_mode_button.configure(bg="#4065d0")
             self.button_multifunc.setChar("²")
+        
+        self.clearArea()
 
 
-    def goHistoricMode(self) :
-        HistoralWindow(self, self.historal)
+    def goHistoricMode(self) -> None:
+        HistoralWindow(self, self._historal)
         
         
 
