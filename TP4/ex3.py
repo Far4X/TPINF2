@@ -88,10 +88,16 @@ if __name__ == "__main__" :
 
 """Ici, le mode texte nous permet de pouvoir visualiser les données sans utiliser directement le programme.
 On peut donc également plus facilement les exploiter avec un autre programme.
-Le mode binaire permet, au contraire, de passer obligatoirement le programme. Cela peut être utile lorsque l'on veut
+Le mode binaire permet, au contraire, de passer obligatoirement par le programme. Cela peut être utile lorsque l'on veut
 obfusquer l'accès aux données.
 
 Le mode binaire permet plus facilement de stocker des données complexes, comme par exemple un arbre binaire de recherche
 qu'il est plus dur, de part leur nature, d'enregistrer sous forme textuelle.
 Le mode binaire peut, dans le cas d'une mauvaise optimisation lors de l'utilisation des fichiers texte, se révéler plus
-économe en stockage. De plus, la lecture en binaire peut parfois être plus rapide que celle en clair."""
+économe en stockage. De plus, la lecture en binaire peut parfois être plus rapide que celle en clair.
+
+En implémentation dans le code, depart la structure de python, qui s'appuie toujours sur des objets, il est généralement plus
+simple d'implémenter une solution d'enregistrement utilisant les fichier binaires, car ils contiennent des objets. Au contraire,
+les fichiers texte, nécessitent parfois, comme ici, de définir une méthode de classe permettant de passer d'un dictionnaire 
+d'attributs à l'objet en lui même. De plus, on doit s'assurer de convertir les données dans le bon type.
+D'où le fait qu'il soit plus simple, lorsque l'on écrit un programme, d'utiliser pickle."""

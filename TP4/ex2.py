@@ -154,7 +154,7 @@ class Groupe :
         self._file = str(val)
 
     def sauvegarder(self) -> None :
-        with open(self.file, "w", newline = "") as f :
+        with open(self.file, "w", newline = "", encoding="UTF-8") as f :
             header = ["Nom", "Date_de_naissance", "Gpa", "Connais_python"]
             writer = csv.DictWriter(f, fieldnames=header)
 

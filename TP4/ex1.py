@@ -1,7 +1,7 @@
 import math
 
 def main() :
-    with open("poème.txt", 'r', encoding="UTF-8") as f :
+    with open("TP4/poème.txt", 'r', encoding="UTF-8") as f :
         current_text = f.read()
 
     for char in ".,!?" :
@@ -11,7 +11,6 @@ def main() :
     current_text = current_text.replace("'", " ")
     current_text = current_text.replace("\n", " ")
     words = current_text.split(" ")
-    print(words)
 
 
     with open("output.txt", "w") as f :
@@ -26,8 +25,7 @@ def main() :
             pwr -= 1
             
         print(test_pi, "\n", math.pi - math.pi % 10**pwr, sep = "")
-        print(test_pi == math.pi - math.pi % 10**pwr)
-        
+        print(f"Les deux valeurs sont elles égales : {test_pi == math.pi - math.pi % 10**pwr}")        
 
 if __name__ == "__main__" :
     main()
