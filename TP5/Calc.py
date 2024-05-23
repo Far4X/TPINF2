@@ -62,7 +62,7 @@ class Calculation :
         self.text_right_member = self.text_right_member.lstrip(self.operation)
 
         if (parenthesis_level_op != None) :
-            for i in range(parenthesis_level_op) :
+            for _ in range(parenthesis_level_op) :
                 self.text_left_member = self.text_left_member.lstrip('(')
                 self.text_right_member = self.text_right_member.rstrip(')')
 
