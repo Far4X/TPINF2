@@ -421,6 +421,9 @@ class Calculatrice(tk.Tk) :
             self._txt.set("")
         else :
             self._txt.set("y = ")
+        
+        self._trigger_reset = False
+
 
 
 
@@ -435,7 +438,8 @@ class Calculatrice(tk.Tk) :
                 self._txt.set("Opération saisie non valide")
             
         else :
-            GraphWindow(self, Calculation(self._txt.get()).Calculate)
+            txt = self._txt.get().lstrip("y = ")
+            GraphWindow(self, Calculation(txt).Calculate)
 
         self._trigger_reset = True
         
