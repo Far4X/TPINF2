@@ -1,10 +1,12 @@
+from __future__ import annotations
 import tkinter as tk
 import math
-from __future__ import annotations
 import typing
 
 
 class Calculation :
+    """Classe qui permet d'opérer des calculs donnés par des chaines de caractères.
+    On aurait également pu utiliser la fonction eval."""
     def __init__(self, text : str) -> None:
         text = text.replace("sin", "s").replace("cos", "c").replace("tan", "t").replace("sqrt", "r").replace("²", "^2")
         while "π" in text :
