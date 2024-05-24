@@ -192,6 +192,8 @@ class HistoralWindow(tk.Toplevel) :
         self.updatePage()
 
     def updatePage(self) -> None:
+        """Permet de mettre à jour le contenu de la page.
+        On garde les anciens labels affichés pour ne pas avoir de problème de redimensionnement de fenêtre ou d'autres éléments."""
         list_op = self._historal.getOps(self.num_page, 10)
 
         if self.num_page == 0 :
@@ -206,7 +208,6 @@ class HistoralWindow(tk.Toplevel) :
 
         for i in range(10) :
             if i < len(list_op) :
-                #self._list_labels[i].config(text = list_op[i], fg = "#000000", bg = "#4065d0")
                 self._list_labels[i].config(text = list_op[i], fg = "#ffffff")
                 self._list_labels[i].grid(column = 0, row = 10-i+(len(list_op)-10), columnspan = 2, padx=5, pady=4, sticky="nsew")
 
@@ -227,10 +228,99 @@ class HistoralWindow(tk.Toplevel) :
             self.num_page -= 1
         self.updatePage()
 
+class ParamWindow(tk.Toplevel) :
+    def __init__(self, master : GraphWindow) :
+        if (type(master) != GraphWindow) :
+            raise TypeError
+        
+        super().__init__(master, bg="#202030")
+
+       
+       
+        self._params = (tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar())
+
+        self._button_push = tk.Button(self, text = "Valider", fg = "#ffffff", border=0, bg="#5585f0", command=self.checkAndPush)
+
+        self._label_params = tk.Label(self, text="Nom des paramètres", fg = "#ffffff", border=0, bg="#202030")
+        self._label_val_x = tk.Label(self, text="Valeur en x", fg = "#ffffff", border=0, bg="#202030")
+        self._label_val_y = tk.Label(self, text="Valeur en y", fg = "#ffffff", border=0, bg="#202030")
+
+        self._label_topleft = tk.Label(self, text="Point en haut à gauche : ", fg = "#ffffff", border=0, bg="#202030")
+        self._label_size_graph = tk.Label(self, text="Taille du graphique : ", fg = "#ffffff", border=0, bg="#202030")
+        self._label_step_mv = tk.Label(self, text="Pas du mouvement : ", fg = "#ffffff", border=0, bg="#202030")
+        self._label_graduation = tk.Label(self, text="Pas de la graduation : ", fg = "#ffffff", border=0, bg="#202030")
+        self._label_step_x = tk.Label(self, text="Pas du tracé du graphe : ", fg = "#ffffff", border=0, bg="#202030")
+
+        self._entry_topleft_x = tk.Entry(self, fg = "#ffffff", border=0, bg="#4065d0", textvariable=self._params[0])
+        self._entry_topleft_y = tk.Entry(self, fg = "#ffffff", border=0, bg="#4065d0", textvariable=self._params[1])
+        self._entry_size_graph_x = tk.Entry(self, fg = "#ffffff", border=0, bg="#4065d0", textvariable=self._params[2])
+        self._entry_size_graph_y = tk.Entry(self, fg = "#ffffff", border=0, bg="#4065d0", textvariable=self._params[3])
+        self._entry_step_mv_x = tk.Entry(self, fg = "#ffffff", border=0, bg="#4065d0", textvariable=self._params[4])
+        self._entry_step_mv_y = tk.Entry(self, fg = "#ffffff", border=0, bg="#4065d0", textvariable=self._params[5])
+        self._entry_graduation_x = tk.Entry(self, fg = "#ffffff", border=0, bg="#4065d0", textvariable=self._params[6])
+        self._entry_graduation_y = tk.Entry(self, fg = "#ffffff", border=0, bg="#4065d0", textvariable=self._params[7])
+        self._entry_step_x = tk.Entry(self, fg = "#ffffff", border=0, bg="#4065d0", textvariable=self._params[8])
+
+
+        self._params[0].set(str(master.top_left[0]))
+        self._params[1].set(str(master.top_left[1]))
+        self._params[2].set(str(master.size_graph[0]))
+        self._params[3].set(str(master.size_graph[1]))
+        self._params[4].set(str(master.step_mv[0]))
+        self._params[5].set(str(master.step_mv[1]))
+        self._params[6].set(str(master.graduations[0]))
+        self._params[7].set(str(master.graduations[1]))
+        self._params[8].set(str(master.stepx))
+        
+
+        self._label_params.grid(row = 0, column=0, sticky="nsew", padx= 20, pady= 5)
+        self._label_val_x.grid(row=0, column=1, sticky="nsew", padx= 20, pady= 5)
+        self._label_val_y.grid(row=0, column=2, sticky="nsew", padx= 20, pady= 5)
+        self._label_topleft.grid(row=1, column=0, sticky="e", padx= 5, pady= 5)
+        self._label_size_graph.grid(row=2, column=0, sticky="e", padx= 5, pady= 5)
+        self._label_step_mv.grid(row=3, column=0, sticky="e", padx= 5, pady= 5)
+        self._label_graduation.grid(row=4, column=0, sticky="e", padx= 5, pady= 5)
+        self._label_step_x.grid(row=5, column=0, sticky="e", padx= 5, pady= 5)
+
+        self._entry_topleft_x.grid(column=1, row = 1, sticky="nsew", padx=2, pady=2)
+        self._entry_topleft_y.grid(column=2, row = 1, sticky="nsew", padx=2, pady=2)
+        self._entry_size_graph_x.grid(column=1, row = 2, sticky="nsew", padx=2, pady=2)
+        self._entry_size_graph_y.grid(column=2, row = 2, sticky="nsew", padx=2, pady=2)
+        self._entry_step_mv_x.grid(column=1, row = 3, sticky="nsew", padx=2, pady=2)
+        self._entry_step_mv_y.grid(column=2, row = 3, sticky="nsew", padx=2, pady=2)
+        self._entry_graduation_x.grid(column=1, row = 4, sticky="nsew", padx=2, pady=2)
+        self._entry_graduation_y.grid(column=2, row = 4, sticky="nsew", padx=2, pady=2)
+        self._entry_step_x.grid(column=1, row = 5, sticky="nsew", padx=2, pady=2)
+
+        self._button_push.grid(column=2, row = 5, sticky="nsew", padx=2, pady=2)
+
+
+    def checkAndPush(self) :
+        result = []
+        for elem in self._params :
+            try :
+                result.append(float(elem.get()))
+            except ValueError :
+                label_output = tk.Label(self, text = "Erreur sur une des variables. Merci de vérifier.", fg = "#ffffff", border=0, bg="#202030")
+                label_output.grid(column=0, columnspan= 3, row = 6, sticky="nsew", padx=2, pady=2)
+                return
+
+        self.master.setParams(result)
+        label_output = tk.Label(self, text = "Les valeurs ont été appliquées.", fg = "#ffffff", border=0, bg="#202030")
+        label_output.grid(column=0, columnspan= 3, row = 6, sticky="nsew", padx=2, pady=2)
+
+        
+
+
+
 class GraphWindow(tk.Toplevel) :
     def __init__(self, master : Calculatrice, function : typing.Callable) -> None :
+        if (type(master) != Calculatrice) :
+            raise TypeError
+        
         super().__init__(master, bg="#202030")
-        self._function = function
+
+        self.function = function
         self.canevas = tk.Canvas(self, bg = "#dddddd", highlightthickness=0, height=200, width=300)
         self.canevas.grid(row = 0, column = 0, columnspan= 4, padx=2, pady=2)
 
@@ -265,10 +355,40 @@ class GraphWindow(tk.Toplevel) :
 
         self.drawGraph()
 
+    @property
+    def function(self) -> typing.Callable :
+        return self._func
+    
+    @function.setter
+    def function(self, func : typing.Callable) :
+        if not callable(func) :
+            raise TypeError("La fonction n'est pas callable")
+        else :
+            self._func = func
 
+    def setParams(self, list_par) :
+        if type(list_par) != list :
+            return TypeError
+        if len(list_par) != 9 :
+            return ValueError
+        
+        for elem in list_par :
+            if (type(elem) != float) :
+                raise TypeError
+            print(elem)
+            
+        self.top_left = [list_par[0], list_par[1]]
+        self.size_graph = [list_par[2], list_par[3]]
+
+        self.step_mv = [list_par[4], list_par[5]]
+        self.graduations = [list_par[6], list_par[7]]
+        self.stepx = list_par[8]
+
+        self.drawGraph()
+        
 
     def openOptionWindow(self) -> None:
-        pass
+        ParamWindow(self)
 
     def goRight(self) -> None :
         self.top_left[0] += self.step_mv[0]
@@ -341,7 +461,7 @@ class GraphWindow(tk.Toplevel) :
         current_x = float(self.top_left[0])
         while current_x < self.size_graph[0] + self.top_left[0] :
             try :
-                val = self._function(current_x)
+                val = self.function(current_x)
             except ZeroDivisionError :
                 val = None
 
@@ -352,7 +472,6 @@ class GraphWindow(tk.Toplevel) :
                 #self.canevas.create_line((((current_x - self.stepx) - self.top_left[0]) / self.size_graph[0]) * 300, ((prev - self.top_left[1]) / self.size_graph[1]) * 200, (((current_x) - self.top_left[0]) / self.size_graph[0]) * 300, ((val - self.top_left[1]) / self.size_graph[1]) * 200)
             prev = val
             current_x += self.stepx
-
 
 
 
@@ -410,11 +529,12 @@ class Calculatrice(tk.Tk) :
 
 
     def addChar(self, char : str) -> None:
-        if not self._trigger_reset :
-            self._txt.set(self._txt.get() + char)
-        else :
-            self._txt.set(char)
+        if self._trigger_reset :
+            self._txt.set("" if not self.graph_mode else "y = ") 
             self._trigger_reset = False
+
+        self._txt.set(self._txt.get() + char)
+            
 
     def clearArea(self) -> None:
         if not self.graph_mode :
@@ -423,8 +543,6 @@ class Calculatrice(tk.Tk) :
             self._txt.set("y = ")
         
         self._trigger_reset = False
-
-
 
 
     def doCalculation(self) -> None:
@@ -436,10 +554,21 @@ class Calculatrice(tk.Tk) :
                 self._historal.opEffectued(self._txt.get())
             except RecursionError:
                 self._txt.set("Opération saisie non valide")
+            except ValueError:
+                self._txt.set("Opération saisie non valide")
+            except AttributeError:
+                self._txt.set("Opération saisie non valide")
             
         else :
             txt = self._txt.get().lstrip("y = ")
-            GraphWindow(self, Calculation(txt).Calculate)
+            try : 
+                GraphWindow(self, Calculation(txt).Calculate)
+            except RecursionError:
+                self._txt.set("Opération saisie non valide")
+            except ValueError:
+                self._txt.set("Opération saisie non valide")
+            except AttributeError:
+                self._txt.set("Opération saisie non valide")
 
         self._trigger_reset = True
         
