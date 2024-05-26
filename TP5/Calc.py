@@ -150,10 +150,27 @@ class Historal :
     def getNbPages(self, lenght : int) -> int :
         return len(self._list_op)//lenght + (1 if len(self._list_op) % lenght != 0 else 0)
     
+class CalulatriceButton(tk.Button) :
+    def __init__(self, parent : tk.Frame | tk.Tk, **kwargs) :
+        super().__init__(parent, kwargs)
+        if ("background" in kwargs or "bg" in kwargs) :
+            
+            init_color_str = (kwargs["background"] if "background" in kwargs else kwargs["bg"] )
+            base_color = (init_color_str[1:3], init_color_str[3:5], init_color_str[5:7])
+            changed_color = (int(int(color, 16)*0.9) for color in base_color)
+            changed_color_str = "#"
+            for color in changed_color :
+                changed_color_str += str(hex(color)).lstrip("0x") 
 
-class CalculatriceButtonChar(tk.Button) :
+            self.bind("<Enter>", func=lambda e: self.config(background=changed_color_str))
+            self.bind("<Leave>", func=lambda e: self.config(background=init_color_str))
+        else :
+            print(kwargs)
+
+
+class CalculatriceButtonChar(CalulatriceButton) :
     def __init__(self, parent : tk.Frame | tk.Tk, char : str, calc_host : Calculatrice) -> None :
-        tk.Button.__init__(self, parent, command=self.clickedOn, text=char, background = ("#909090" if str(char) not in "0123456789" else "#aaa"), relief="flat")
+        CalulatriceButton.__init__(self, parent, command=self.clickedOn, text=char, background = ("#909090" if str(char) not in "0123456789" else "#a0a0a0"), relief="flat")
         self.parent : tk.Frame = parent
         self.calc_host : Calculatrice = calc_host
         self.char = char
@@ -183,8 +200,8 @@ class HistoralWindow(tk.Toplevel) :
 
         self.geometry("300x450+200+200")
 
-        self.button_next = tk.Button(self, text="->", command=self.nextPage, bg="#5585f0", relief="flat")
-        self.button_prev = tk.Button(self, text="<-", command=self.prevPage, bg="#5585f0", relief="flat")
+        self.button_next = CalulatriceButton(self, text="->", command=self.nextPage, bg="#5585f0", relief="flat")
+        self.button_prev = CalulatriceButton(self, text="<-", command=self.prevPage, bg="#5585f0", relief="flat")
         self.button_prev.grid(column=0, row=11, sticky="nsew", padx=5, pady=5)
         self.button_next.grid(column=1, row=11, sticky="nsew", padx=5, pady=5)
         self.rowconfigure(11, weight=1)
@@ -234,12 +251,10 @@ class ParamWindow(tk.Toplevel) :
             raise TypeError
         
         super().__init__(master, bg="#202030")
-
-       
        
         self._params = (tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar(), tk.StringVar())
 
-        self._button_push = tk.Button(self, text = "Valider", fg = "#ffffff", border=0, bg="#5585f0", command=self.checkAndPush)
+        self._button_push = CalulatriceButton(self, text = "Valider", fg = "#ffffff", border=0, bg="#5585f0", command=self.checkAndPush)
 
         self._label_params = tk.Label(self, text="Nom des paramètres", fg = "#ffffff", border=0, bg="#202030")
         self._label_val_x = tk.Label(self, text="Valeur en x", fg = "#ffffff", border=0, bg="#202030")
@@ -310,9 +325,6 @@ class ParamWindow(tk.Toplevel) :
         label_output.grid(column=0, columnspan= 3, row = 6, sticky="nsew", padx=2, pady=2)
 
         
-
-
-
 class GraphWindow(tk.Toplevel) :
     def __init__(self, master : Calculatrice, function : typing.Callable) -> None :
         if (type(master) != Calculatrice) :
@@ -331,13 +343,13 @@ class GraphWindow(tk.Toplevel) :
         self.graduations = [1, 1]
         self.stepx = 0.01
 
-        self.button_options = tk.Button(self, text="Options", command=self.openOptionWindow, bg = "#4065d0", relief="flat")
-        self.button_go_right = tk.Button(self, text=">", command=self.goRight, bg = "#5585f0", relief="flat")
-        self.button_go_left = tk.Button(self, text="<", command=self.goLeft, bg = "#5585f0", relief="flat")
-        self.button_go_up = tk.Button(self, text="     ^     ", command=self.goUp, bg = "#5585f0", relief="flat")
-        self.button_go_down = tk.Button(self, text="     v     ", command=self.goDown, bg = "#5585f0", relief="flat")
-        self.button_zoom_in = tk.Button(self, text="Zoom +", command=self.zoomIn, bg = "#4065d0", relief="flat")
-        self.button_zoom_out = tk.Button(self, text="Zoom -", command=self.zoomOut, bg = "#4065d0", relief="flat")
+        self.button_options = CalulatriceButton(self, text="Options", command=self.openOptionWindow, bg = "#4065d0", relief="flat")
+        self.button_go_right = CalulatriceButton(self, text=">", command=self.goRight, bg = "#5585f0", relief="flat")
+        self.button_go_left = CalulatriceButton(self, text="<", command=self.goLeft, bg = "#5585f0", relief="flat")
+        self.button_go_up = CalulatriceButton(self, text="     ^     ", command=self.goUp, bg = "#5585f0", relief="flat")
+        self.button_go_down = CalulatriceButton(self, text="     v     ", command=self.goDown, bg = "#5585f0", relief="flat")
+        self.button_zoom_in = CalulatriceButton(self, text="Zoom +", command=self.zoomIn, bg = "#4065d0", relief="flat")
+        self.button_zoom_out = CalulatriceButton(self, text="Zoom -", command=self.zoomOut, bg = "#4065d0", relief="flat")
 
 
         self.button_options.grid(row = 1, column=0, rowspan=2, padx=5, pady=5, sticky="nsew")
@@ -513,18 +525,18 @@ class Calculatrice(tk.Tk) :
         self.button_multifunc = CalculatriceButtonChar(self.frame, "²", self)
         self.button_multifunc.grid(row = 6, column=4, sticky="ewns", padx=5, pady = 5)
 
-        self.do_opeation_button = tk.Button(self.frame, command=self.doCalculation, text="=", background="#5585f0", relief="flat")
+        self.do_opeation_button = CalulatriceButton(self.frame, command=self.doCalculation, text="=", background="#5585f0", relief="flat")
         self.do_opeation_button.grid(row = 6, column = 0, padx=5, pady=5, sticky="nsew")
 
         btm_color = "#4065d0"
 
-        self.graphic_mode_button = tk.Button(self.frame, command=self.goGraphicMode, text="Mode graphique", background=btm_color, relief="flat")
+        self.graphic_mode_button = CalulatriceButton(self.frame, command=self.goGraphicMode, text="Mode graphique", background=btm_color, relief="flat")
         self.graphic_mode_button.grid(row = 7, column = 1, padx=5, pady=5, sticky="nsew", columnspan=2)
 
-        self.historique_mode_button = tk.Button(self.frame, command=self.goHistoricMode, text="Historique", background=btm_color, relief="flat")
+        self.historique_mode_button = CalulatriceButton(self.frame, command=self.goHistoricMode, text="Historique", background=btm_color, relief="flat")
         self.historique_mode_button.grid(row = 7, column = 3, padx=5, pady=5, sticky="nsew", columnspan=2) 
 
-        self.clear_button = tk.Button(self.frame, command=self.clearArea, text="cls", background=btm_color, relief="flat")
+        self.clear_button = CalulatriceButton(self.frame, command=self.clearArea, text="cls", background=btm_color, relief="flat")
         self.clear_button.grid(row = 7, column = 0, padx=5, pady=5, sticky="nsew", columnspan=1)       
 
 
@@ -575,11 +587,9 @@ class Calculatrice(tk.Tk) :
     def goGraphicMode(self) -> None:
         if not self.graph_mode :
             self.graph_mode = True
-            self.graphic_mode_button.configure(bg="#209010")
             self.button_multifunc.setChar("x")
         else :
             self.graph_mode = False
-            self.graphic_mode_button.configure(bg="#4065d0")
             self.button_multifunc.setChar("²")
         
         self.clearArea()
